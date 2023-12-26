@@ -6,3 +6,13 @@
 //
 
 import Foundation
+
+struct Task: Identifiable {
+    let id = UUID()
+    let title: String
+//    let description: String
+//    let date: Date
+//    let isCompleted: Bool
+}
+
+
