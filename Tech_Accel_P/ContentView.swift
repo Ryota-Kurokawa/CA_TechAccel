@@ -21,7 +21,6 @@ struct ContentView: View {
                     .foregroundColor(.green)
                 Spacer()
             }
-            
             HStack{
                 TextField("new your task", text: $newitem)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -69,8 +68,7 @@ struct ContentView: View {
     
     func RemoveTask(offsets: IndexSet){
         TaskList.remove(atOffsets: offsets)
-        UserDefaults.standard.removeObject(forKey: "TaskList")
-        UserDefaults.standard.set(self.TaskList, forKey: "TaskList")
+        UserDefaults.standard.set(TaskList, forKey: "TaskList")
     }
 }
 
