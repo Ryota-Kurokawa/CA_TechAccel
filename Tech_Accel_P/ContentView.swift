@@ -9,17 +9,29 @@ import SwiftUI
 
 struct ContentView: View {
     @State var newitem = ""
-    @State var TaskList = UserDefaults.standard.array(forKey: "TaskList")
-    
+    @State var TaskList = UserDefaults.standard.array(forKey: "TaskList") as? [String] ?? []
     
     var body: some View {
         VStack {
+            Spacer().frame(height: 20,alignment: .center)
             HStack{
+                Spacer()
                 Text("Tech Accel")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
                 Spacer()
+            }
+            List {
+                ForEach(TaskList, id: \.self) { task in
+                    Text("\(task)")
+                }
+                .onDelete { indices in
+                    // 指定された行を削除する
+                    TaskList.remove(atOffsets: indices)
+                    // 削除後のTaskListをUserDefaultsに再保存
+                    UserDefaults.standard.set(TaskList, forKey: "TaskList")
+                }
             }
             HStack{
                 TextField("new your task", text: $newitem)
@@ -39,34 +51,18 @@ struct ContentView: View {
                     }
                 }
             }
-            List {
-                ForEach(TaskList, id: \.self) { task in
-                    Text("\(task)")
-                }
-                .onDelete { indices in
-                    UserDefaults.removeObject(forKey: "TaskList")
-                    TaskList.remove(atOffsets: indices)
-                    UserDefaults.standard.set(TaskList, forKey: "TaskList")
-                }
-            }
-            
-            
             Spacer()
-        }.onAppear(){
-            guard let defaultItem = TaskList
-            else{return}
-            self.TaskList = defaultItem
-            if self.TaskList != UserDefaults.standard.array(forKey: "TaskList") as? [String] {
-                UserDefaults.standard.removeObject(forKey: "TaskList")
+        }.onAppear() {
+            // 既に`TaskList`が`UserDefaults`に保存されているか確認する
+            if let savedList = UserDefaults.standard.array(forKey: "TaskList") as? [String] {
+                self.TaskList = savedList
+            } else {
+                // `TaskList`が存在しない場合は初期化
                 UserDefaults.standard.set(self.TaskList, forKey: "TaskList")
             }
         }
     }
-    //    func RemoveTask(offsets: IndexSet){
-    //        TaskList.remove(atOffsets: offsets)
-    //    }
-    
-    func RemoveTask(offsets: IndexSet){
+    mutating func RemoveTask(offsets: IndexSet){
         TaskList.remove(atOffsets: offsets)
         UserDefaults.standard.set(TaskList, forKey: "TaskList")
     }
