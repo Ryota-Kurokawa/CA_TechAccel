@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct makeTask: View {
-    @State var title: String = ""
+struct MakeTask: View {
+    @Binding var title: String
     @State var description: String = ""
     @Binding var TaskList: [Task]
     @Environment(\.dismiss) var dismiss
@@ -42,6 +42,7 @@ struct makeTask: View {
                 TaskList.append(task)
                 saveTasks()
                 dismiss()
+                title = ""
             } label: {
                 Text("完了")
                     .font(.headline)

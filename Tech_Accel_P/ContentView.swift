@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var newitem = ""
+    @State var title = ""
     @State var TaskList: [Task] = []
+    @State var selected: Task = Task(title: "", description: "", isDone: false)
     @State private var isShowingView: Bool = false
     
     
@@ -27,7 +28,9 @@ struct ContentView: View {
                 }
                 List {
                     ForEach(TaskList, id: \.self) { task in
-                        Text(task.title)
+                        NavigationLink(destination: DetailView(task: self.$TaskList[TaskList.firstIndex(of: task)!])) {
+                            Text(task.title)
+                        }
                     }
                     .onDelete { indices in
                         TaskList.remove(atOffsets: indices)
@@ -35,15 +38,15 @@ struct ContentView: View {
                     }
                 }
                 HStack {
-                    TextField("quick make", text: $newitem)
+                    TextField("quick make", text: $title)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 150, height: 50, alignment: .center)
                         .onSubmit() {
-                            if !newitem.isEmpty{
-                                let task = Task(title: newitem, description: "", isDone: false)
+                            if !title.isEmpty{
+                                let task = Task(title: title, description: "", isDone: false)
                                 TaskList.append(task)
                                 saveTasks()
-                                newitem = ""
+                                title = ""
                             }
                         }
                     Button {
@@ -58,7 +61,7 @@ struct ContentView: View {
                             .cornerRadius(10)
                     }
                     .sheet(isPresented: $isShowingView) {
-                        makeTask(TaskList: $TaskList)
+                        MakeTask(title: $title, TaskList: $TaskList)
                     }
                 }
                 Spacer()
@@ -90,10 +93,6 @@ struct ContentView: View {
                 print(error)
             }
         }
-    }
-    mutating func removeTask(offsets: IndexSet) {
-        TaskList.remove(atOffsets: offsets)
-        saveTasks()
     }
 }
 
