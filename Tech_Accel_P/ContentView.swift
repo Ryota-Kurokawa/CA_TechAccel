@@ -58,7 +58,7 @@ struct ContentView: View {
                             .cornerRadius(10)
                     }
                     .sheet(isPresented: $isShowingView) {
-                        makeTask()
+                        makeTask(TaskList: $TaskList)
                     }
                 }
                 Spacer()

@@ -10,7 +10,7 @@ import SwiftUI
 struct makeTask: View {
     @State var title: String = ""
     @State var description: String = ""
-    @State var TaskList: [Task] = []
+    @Binding var TaskList: [Task]
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -65,17 +65,4 @@ struct makeTask: View {
             print(error)
         }
     }
-    init(){
-        if let data = UserDefaults.standard.data(forKey: Task.storeKey){
-            do {
-                TaskList = try JSONDecoder().decode([Task].self, from: data)
-            } catch {
-                print(error)
-            }
-        }
-    }
-}
-
-#Preview {
-    makeTask()
 }
