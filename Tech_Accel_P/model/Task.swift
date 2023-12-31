@@ -9,15 +9,17 @@ import Foundation
 
 struct Task: Codable, Identifiable, Hashable {
 
-    static let storeKey = "Task"
+    static let storeKey = "TaskListKey"
 
     let id: String
     let title: String
+    let description: String
     let isDone: Bool
 
-    init(id: String = UUID().uuidString, title: String, isDone: Bool) {
+    init(id: String = UUID().uuidString, title: String, description: String, isDone: Bool) {
         self.id = UUID().uuidString
         self.title = title
+        self.description = description
         self.isDone = isDone
     }
 }

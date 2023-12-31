@@ -9,62 +9,91 @@ import SwiftUI
 
 struct ContentView: View {
     @State var newitem = ""
-    @State var TaskList = UserDefaults.standard.array(forKey: "TaskList") as? [String] ?? []
+    @State var TaskList: [Task] = []
+    @State private var isShowingView: Bool = false
+    
     
     var body: some View {
-        VStack {
-            Spacer().frame(height: 20,alignment: .center)
-            HStack{
-                Spacer()
-                Text("Tech Accel")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.green)
-                Spacer()
-            }
-            List {
-                ForEach(TaskList, id: \.self) { task in
-                    Text("\(task)")
+        NavigationView {
+            VStack {
+                Spacer().frame(height: 20,alignment: .center)
+                HStack {
+                    Spacer()
+                    Text("Tech Accel")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                    Spacer()
                 }
-                .onDelete { indices in
-                    // 指定された行を削除する
-                    TaskList.remove(atOffsets: indices)
-                    // 削除後のTaskListをUserDefaultsに再保存
-                    UserDefaults.standard.set(TaskList, forKey: "TaskList")
+                List {
+                    ForEach(TaskList, id: \.self) { task in
+                        Text(task.title)
+                    }
+                    .onDelete { indices in
+                        TaskList.remove(atOffsets: indices)
+                        saveTasks()
+                    }
                 }
-            }
-            HStack{
-                TextField("new your task", text: $newitem)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 300)
-                Button(action: {
-                    self.TaskList.append(self.newitem)
-                    UserDefaults.standard.set(self.TaskList, forKey: "TaskList")
-                    self.newitem = ""
-                }){
-                    ZStack{
-                        RoundedRectangle(cornerRadius: 5)
-                            .frame(width: 50, height: 30)
-                            .foregroundColor(.green)
-                        Text("add")
+                HStack {
+                    TextField("quick make", text: $newitem)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 150, height: 50, alignment: .center)
+                        .onSubmit() {
+                            if !newitem.isEmpty{
+                                let task = Task(title: newitem, description: "", isDone: false)
+                                TaskList.append(task)
+                                saveTasks()
+                                newitem = ""
+                            }
+                        }
+                    Button {
+                        isShowingView.toggle()
+                    } label: {
+                        Text("詳細登録")
+                            .font(.headline)
                             .foregroundColor(.white)
+                            .padding()
+                            .frame(width: 150, height: 50)
+                            .background(Color.green)
+                            .cornerRadius(10)
+                    }
+                    .sheet(isPresented: $isShowingView) {
+                        makeTask()
+                    }
+                }
+                Spacer()
+            }.onAppear() {
+                // Viewが表示される際にUserDefaultsからデータを取得
+                if let data = UserDefaults.standard.data(forKey: Task.storeKey) {
+                    do {
+                        TaskList = try JSONDecoder().decode([Task].self, from: data)
+                    } catch {
+                        print("Error decoding tasks: \(error)")
                     }
                 }
             }
-            Spacer()
-        }.onAppear() {
-            // 既に`TaskList`が`UserDefaults`に保存されているか確認する
-            if let savedList = UserDefaults.standard.array(forKey: "TaskList") as? [String] {
-                self.TaskList = savedList
-            } else {
-                // `TaskList`が存在しない場合は初期化
-                UserDefaults.standard.set(self.TaskList, forKey: "TaskList")
+        }
+    }
+    func saveTasks(){
+        do {
+            let data = try JSONEncoder().encode(TaskList)
+            UserDefaults.standard.set(data, forKey: Task.storeKey)
+        } catch{
+            print(error)
+        }
+    }
+    init(){
+        if let data = UserDefaults.standard.data(forKey: Task.storeKey){
+            do {
+                TaskList = try JSONDecoder().decode([Task].self, from: data)
+            } catch {
+                print(error)
             }
         }
     }
-    mutating func RemoveTask(offsets: IndexSet){
+    mutating func removeTask(offsets: IndexSet) {
         TaskList.remove(atOffsets: offsets)
-        UserDefaults.standard.set(TaskList, forKey: "TaskList")
+        saveTasks()
     }
 }
 
