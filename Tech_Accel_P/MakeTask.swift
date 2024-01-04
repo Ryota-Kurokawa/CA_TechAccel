@@ -8,15 +8,14 @@
 import SwiftUI
 
 struct MakeTask: View {
-    @Binding var title: String
-    @State var description: String = ""
-    @Binding var TaskList: [Task]
+    @Binding public var title: String
+    @State private var description: String = ""
+    @Binding public var taskList: [Task]
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(spacing: 20) {
-            
-            HStack {
+            HStack(spacing: 20) {
                 Text("詳細画面設定")
                     .font(.title)
                     .fontWeight(.bold)
@@ -39,7 +38,7 @@ struct MakeTask: View {
             Spacer().frame(height: 100)
             Button {
                 let task = Task(title: title, description: description, isDone: false)
-                TaskList.append(task)
+                taskList.append(task)
                 saveTasks()
                 dismiss()
                 title = ""
@@ -60,7 +59,7 @@ struct MakeTask: View {
     }
     func saveTasks(){
         do {
-            let data = try JSONEncoder().encode(TaskList)
+            let data = try JSONEncoder().encode(taskList)
             UserDefaults.standard.set(data, forKey: Task.storeKey)
         } catch{
             print(error)

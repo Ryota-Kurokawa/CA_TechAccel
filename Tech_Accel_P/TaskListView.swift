@@ -7,44 +7,63 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct TaskListView: View {
     @State var title = ""
-    @State var TaskList: [Task] = []
+    enum Const {
+        static let hoge = "TechAccel"
+    }
+    @State var taskList: [Task] = []
     @State var selected: Task = Task(title: "", description: "", isDone: false)
     @State private var isShowingView: Bool = false
+    @State var onPressedTop: Bool = false
+    @State var onPressedShare: Bool = false
     
     
     var body: some View {
         NavigationView {
-            VStack {
-                Spacer().frame(height: 20,alignment: .center)
-                HStack {
+            VStack(spacing: 20) {
+                Spacer().frame(height: 20, alignment: .center)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Menu(content: {
+                                NavigationLink(destination: TaskListView()){
+                                    Text("Top Page")
+                                }
+                                NavigationLink(destination: ShareView()){
+                                    Text("Share Page")
+                                }
+                            }, label: {
+                                Image(systemName: "list.bullet")
+                            })
+                        }
+                    }
+                HStack(spacing: 20) {
                     Spacer()
-                    Text("Tech Accel")
+                    Text(Const.hoge)
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
                     Spacer()
                 }
                 List {
-                    ForEach(TaskList, id: \.self) { task in
-                        NavigationLink(destination: DetailView(task: self.$TaskList[TaskList.firstIndex(of: task)!])) {
+                    ForEach(taskList, id: \.self) { task in
+                        NavigationLink(destination: DetailView(task: self.$taskList[taskList.firstIndex(of: task)!])) {
                             Text(task.title)
                         }
                     }
                     .onDelete { indices in
-                        TaskList.remove(atOffsets: indices)
+                        taskList.remove(atOffsets: indices)
                         saveTasks()
                     }
                 }
-                HStack {
+                HStack(spacing: 20) {
                     TextField("quick make", text: $title)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 150, height: 50, alignment: .center)
                         .onSubmit() {
                             if !title.isEmpty{
                                 let task = Task(title: title, description: "", isDone: false)
-                                TaskList.append(task)
+                                taskList.append(task)
                                 saveTasks()
                                 title = ""
                             }
@@ -61,7 +80,7 @@ struct ContentView: View {
                             .cornerRadius(10)
                     }
                     .sheet(isPresented: $isShowingView) {
-                        MakeTask(title: $title, TaskList: $TaskList)
+                        MakeTask(title: $title, taskList: $taskList)
                     }
                 }
                 Spacer()
@@ -69,7 +88,7 @@ struct ContentView: View {
                 // Viewが表示される際にUserDefaultsからデータを取得
                 if let data = UserDefaults.standard.data(forKey: Task.storeKey) {
                     do {
-                        TaskList = try JSONDecoder().decode([Task].self, from: data)
+                        taskList = try JSONDecoder().decode([Task].self, from: data)
                     } catch {
                         print("Error decoding tasks: \(error)")
                     }
@@ -79,7 +98,7 @@ struct ContentView: View {
     }
     func saveTasks(){
         do {
-            let data = try JSONEncoder().encode(TaskList)
+            let data = try JSONEncoder().encode(taskList)
             UserDefaults.standard.set(data, forKey: Task.storeKey)
         } catch{
             print(error)
@@ -88,7 +107,7 @@ struct ContentView: View {
     init(){
         if let data = UserDefaults.standard.data(forKey: Task.storeKey){
             do {
-                TaskList = try JSONDecoder().decode([Task].self, from: data)
+                taskList = try JSONDecoder().decode([Task].self, from: data)
             } catch {
                 print(error)
             }
@@ -97,5 +116,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    TaskListView()
 }
