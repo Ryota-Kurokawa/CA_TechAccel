@@ -11,7 +11,7 @@ import SwiftUI
 struct Tech_Accel_PApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TaskListView()
         }
     }
 }
